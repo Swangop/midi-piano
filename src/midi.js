@@ -1,51 +1,5 @@
-let listenersAdded = false;
-
-export const midiBegin = (handler) => {
-  if (!listenersAdded) {
-    window.addEventListener("midiNoteOn", (e) => {
-      const { note } = e.detail;
-      handler(getNoteName(note));
-    });
-    window.addEventListener("midiNoteOff", (e) => {
-      const { note } = e.detail;
-      console.log("Note OFF event received:", note);
-    });
-    listenersAdded = true;
-  }
-  if (navigator.requestMIDIAccess) {
-    navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
-  } else {
-    console.error("Web MIDI API not supported in this browser.");
-  }
-};
-function onMIDISuccess(midiAccess) {
-  for (let input of midiAccess.inputs.values()) {
-    input.onmidimessage = handleMIDIMessage;
-  }
-}
-
-function onMIDIFailure() {
-  alert("Failed to access MIDI devices.");
-}
-
-function handleMIDIMessage(event) {
-  const [status, note, velocity] = event.data;
-
-  const command = status >> 4;
-
-  if (command === 9 && velocity > 0) {
-    const midiEvent = new CustomEvent("midiNoteOn", {
-      detail: { note, velocity },
-    });
-    window.dispatchEvent(midiEvent);
-  } else if (command === 8 || (command === 9 && velocity === 0)) {
-    const midiEvent = new CustomEvent("midiNoteOff", {
-      detail: { note },
-    });
-    window.dispatchEvent(midiEvent);
-  }
-}
-
+let midi = null; // global MIDIAccess object
+let handler = null;
 const noteNames = [
   "c",
   "c#",
@@ -60,6 +14,64 @@ const noteNames = [
   "a#",
   "b",
 ];
+
+function listInputsAndOutputs(midiAccess) {
+  for (const entry of midiAccess.inputs) {
+    const input = entry[1];
+    console.log(
+      `Input port [type:'${input.type}']` +
+        ` id:'${input.id}'` +
+        ` manufacturer:'${input.manufacturer}'` +
+        ` name:'${input.name}'` +
+        ` version:'${input.version}'`
+    );
+  }
+
+  for (const entry of midiAccess.outputs) {
+    const output = entry[1];
+    console.log(
+      `Output port [type:'${output.type}'] id:'${output.id}' manufacturer:'${output.manufacturer}' name:'${output.name}' version:'${output.version}'`
+    );
+  }
+}
+
+function onMIDIMessage(event) {
+  if (event.data.length > 1) {
+    let str = `MIDI message received at timestamp ${event.timeStamp}[${event.data.length} bytes]: `;
+    for (const character of event.data) {
+      str += `0x${character.toString(16)} `;
+    }
+    console.log(str);
+    console.log(event.data);
+    const [status, note, velocity] = event.data;
+    if (velocity > 0) {
+      handler(getNoteName(note));
+    }
+  }
+}
+
+function startLoggingMIDIInput(midiAccess) {
+  midiAccess.inputs.forEach((entry) => {
+    entry.onmidimessage = onMIDIMessage;
+  });
+}
+
+function onMIDISuccess(midiAccess) {
+  console.log("MIDI ready!");
+  midi = midiAccess;
+  listInputsAndOutputs(midiAccess);
+  startLoggingMIDIInput(midiAccess);
+}
+
+function onMIDIFailure(msg) {
+  console.error(`Failed to get MIDI access - ${msg}`);
+}
+
+export const midiBegin = (h) => {
+  navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
+  handler = h;
+};
+
 
 function getNoteName(midiNote) {
   const octave = Math.floor(midiNote / 12) - 1;

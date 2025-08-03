@@ -3,10 +3,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { Stave, Renderer, StaveNote, Voice, Formatter } from "vexflow";
 import { midiBegin } from "./midi";
 import { getMidiNumber, initAudioContext, playNote } from "./utils";
-
+import "bootstrap/dist/css/bootstrap.min.css";
 let gnotes = [
   new StaveNote({ keys: ["c/4"], duration: "q" }),
-  new StaveNote({ keys: ["d/4"], duration: "q" }),
+  new StaveNote({ keys: ["c/4"], duration: "q" }),
   new StaveNote({ keys: ["b/4"], duration: "q" }),
   new StaveNote({ keys: ["c/5"], duration: "q" }),
 ];
@@ -35,7 +35,6 @@ const changeNoteColor = (note, color) => {
 };
 let counter = 0;
 
-//get 4 random notes from possibleNotes
 const getRandomNotes = () => {
   const randomNotes = [];
   while (randomNotes.length < 4) {
@@ -55,22 +54,15 @@ function App() {
   const outputRef = useRef(null);
   const [notes, setNotes] = useState([...gnotes]);
   const [muted, setMuted] = useState(true);
+  const [stats, setStats] = useState({ correct: 0, incorrect: 0 });
   useEffect(() => {
     setupVexFlow();
-
-    return () => {
-      // Remove MIDI listeners on unmount
-      window.removeEventListener("midiNoteOn", keyHandler);
-      window.removeEventListener("midiNoteOff", () => {});
-    };
   }, []);
   useEffect(() => {
     paintStave();
   }, [notes]);
 
   const setupVexFlow = () => {
-    window.removeEventListener("midiNoteOn", keyHandler);
-    window.removeEventListener("midiNoteOff", () => {});
     const div = outputRef.current;
     div.innerHTML = "";
     midiBegin(keyHandler);
@@ -79,7 +71,6 @@ function App() {
     // Configure the rendering context.
     renderer.resize(500, 500);
     global.GLOBAL_CONTEXT = renderer.getContext();
-    global.GLOBAL_CONTEXT.setFont("Arial", 10);
   };
 
   const paintStave = () => {
@@ -115,13 +106,20 @@ function App() {
       setNotes([...gnotes]);
     } else {
       if (note === notes[counter].keys[0]) {
-        gnotes[counter] = changeNoteColor(notes[counter], "green");
+        gnotes[counter] = changeNoteColor(gnotes[counter], "green");
         setNotes([...gnotes]);
+        setStats((prevStats) => ({
+          ...prevStats,
+          correct: prevStats.correct + 1,
+        }));
         counter++;
       } else {
-        gnotes[counter] = changeNoteColor(notes[counter], "red");
+        gnotes[counter] = changeNoteColor(gnotes[counter], "red");
         setNotes([...gnotes]);
-        counter++;
+        setStats((prevStats) => ({
+          ...prevStats,
+          incorrect: prevStats.incorrect + 1,
+        }));
       }
     }
   };
@@ -131,19 +129,30 @@ function App() {
   };
 
   return (
-    <div className="App" style={{ padding: "2rem" }}>
-      <h1>VexFlow + EasyScore in React {muted ? "1" : "0  "}</h1>
-      <div ref={outputRef}></div>
-      <MuteButton
-        handleMuteToggle={handleMuteToggle}
-        initAudioContext={initAudioContext}
-        muted={muted}
-      ></MuteButton>
-      <button
-        onClick={() => {
-          if (!muted) playNote(60);
-        }}
-      >Sound test</button>
+    <div className="App container" style={{ padding: "2rem" }}>
+      <div className="row justify-content-center">
+        <div className="col-md-4 text-center">
+          <h3>Stats:</h3>
+          <p>Correct: {stats.correct}</p>
+          <p>Incorrect: {stats.incorrect}</p>
+        </div>
+        <div className="col-md-8 text-center">
+          <h1>Piano Trainer</h1>
+          <div ref={outputRef} className=""></div>
+          <MuteButton
+            handleMuteToggle={handleMuteToggle}
+            initAudioContext={initAudioContext}
+            muted={muted}
+          ></MuteButton>
+          <button
+            onClick={() => {
+              if (!muted) keyHandler("c/4");
+            }}
+          >
+            Sound test
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
