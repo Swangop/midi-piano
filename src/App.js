@@ -105,7 +105,8 @@ function App() {
       gnotes = getRandomNotes();
       setNotes([...gnotes]);
     } else {
-      if (note === notes[counter].keys[0]) {
+      if (note === gnotes[counter].keys[0]) {
+        console.log("Correct note played:", note);
         gnotes[counter] = changeNoteColor(gnotes[counter], "green");
         setNotes([...gnotes]);
         setStats((prevStats) => ({
@@ -114,6 +115,7 @@ function App() {
         }));
         counter++;
       } else {
+        console.log("Incorrect note played, its supossed to be:", gnotes[counter].keys[0]);
         gnotes[counter] = changeNoteColor(gnotes[counter], "red");
         setNotes([...gnotes]);
         setStats((prevStats) => ({
