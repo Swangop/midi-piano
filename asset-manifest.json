@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/midi-piano/static/css/main.ad4bbdcc.css",
+    "main.js": "/midi-piano/static/js/main.7f6fcf14.js",
+    "static/js/453.ce5f0de2.chunk.js": "/midi-piano/static/js/453.ce5f0de2.chunk.js",
+    "index.html": "/midi-piano/index.html",
+    "main.ad4bbdcc.css.map": "/midi-piano/static/css/main.ad4bbdcc.css.map",
+    "main.7f6fcf14.js.map": "/midi-piano/static/js/main.7f6fcf14.js.map",
+    "453.ce5f0de2.chunk.js.map": "/midi-piano/static/js/453.ce5f0de2.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.ad4bbdcc.css",
+    "static/js/main.7f6fcf14.js"
+  ]
+}
