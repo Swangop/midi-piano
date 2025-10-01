@@ -45,7 +45,7 @@ function onMIDIMessage(event) {
     console.log(str);
     console.log(event.data);
     const [status, note, velocity] = event.data;
-    if (velocity > 0 && status != undefined) {
+    if (velocity > 0 && status !== undefined) {
       handler(getNoteName(note));
     }
   }
