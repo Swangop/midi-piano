@@ -1,5 +1,5 @@
 # MIDI Piano Trainer
-
+## Overview Video:  https://youtu.be/N1pxT-55Dqg
 ## Overview
 
 MIDI Piano Trainer is an interactive web-based application designed to help users learn and practice piano notes on a digital keyboard. The core concept revolves around randomly generating musical notes on a virtual stave, challenging players to identify and play them quickly. This approach fosters fast reactions, muscle memory, and improved sheet music reading skills. Originally developed as a personal tool to practice my own sheet music reading proficiency, the app serves as an entry-level trainer for beginners. While it may seem simplistic to experienced musicians, its unpredictable note generation makes it highly effective for building foundational speed and memorization.
